@@ -28,4 +28,9 @@ class SecurityUtils:
             return new_hash == stored_hash
         except ValueError:
             return False
-        
+    
+    @staticmethod
+    def generate_secure_password(length: int = 12) -> str:
+        """Generate a secure random password"""
+        characters = string.ascii_letters + string.digits + string.punctuation
+        return ''.join(secrets.choice(characters) for _ in range(length))

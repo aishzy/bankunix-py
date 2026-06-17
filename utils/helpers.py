@@ -94,3 +94,87 @@ class ValidationUtils:
         
         return True, 'Valid amount'
     
+class IDGenerator:
+    """Generate unique IDs for various users"""
+
+    @staticmethod 
+    def gneerate_user_id() -> str:
+        """Generate unique user ID"""
+        return f'USR_{int(datetime.now().timestamp() * 1000)}_{secrets.token_hex(4).upper()}'
+    
+    @staticmethod
+    def generate_account_id() -> str:
+        """Generate unique account ID"""
+        return f'USR_{int(datetime.now().timestamp() * 1000)}_{secrets.token_hex(4).upper()}'
+
+    @staticmethod
+    def generate_account_number() -> str:
+        """Generate account number (16 digits)"""
+        return ''.join(secrets.choice(string.digits) for _ in range(16))
+
+    @staticmethod
+    def generate_transaction_id() -> str:
+        """Generate unique transaction ID"""
+        return f'TXN_{int(datetime.now().timestamp() * 1000)}_{secrets.token_hex(4).upper()}'
+    
+    @staticmethod
+    def generate_transfer_id() -> str:
+        return f'TRF_{int(datetime.now().timestamp() * 1000)}_{secrets.token_hex(4).upper()}'
+
+    @staticmethod
+    def generate_bill_id() -> str:
+        return f'BIL_{int(datetime.now().timestamp() * 1000)}_{secrets.token_hex(4).upper()}'
+    
+    @staticmethod
+    def generate_audit_log() -> str:
+        return f'AUD_{int(datetime.now().timestamp() * 1000)}_{secrets.token_hex(4).upper()}'
+    
+    @staticmethod
+    def generate_reference_number() -> str:
+        """Generate transaction reference number"""
+        return ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+    
+
+class FormatUtils:
+    """Formatting utilities"""
+
+    @staticmethod
+    def format_currency(amount: float, currency: str = 'MYR') -> str:
+        """Format amount as currency"""
+        currency_symbols = {
+            "USD": "$",
+            "EUR": "€",
+            "GBP": "£",
+            "JPY": "¥",
+            "MYR": "RM"
+        }
+
+        symbol = currency_symbols.get(currency, currency)
+        return f'{symbol} {amount:,.2f}'
+    
+    @staticmethod
+    def format_datetime(dt: datetime) -> str:
+        """Format datetime for display"""
+        return dt.strftime('%Y-%d-%d %H:%M:%S')
+    
+    @staticmethod
+    def format_date(dt: datetime) -> str:
+        """Format date for display"""
+        return dt.strftime('%Y-%m-%d')
+    
+    @staticmethod
+    def mask_account_number(account_number: str) -> str:
+        """Mask account number for display (show only last 4 digits)"""
+        if len(account_number) < 4:
+            return '*' * len(account_number)
+        return '*' * (len(account_number) - 4) + account_number[-4]
+    
+    @staticmethod
+    def mask_email(email: str) -> str:
+        """Mask email for display"""
+        parts = email.split('@')
+        if len(parts[0]) <= 2:
+            masked_local = parts[0][0] + '*' * (len(parts[0]) -1)
+        else:
+            masked_local = parts[0][:2] + '*' * (len(parts[0]) -2)
+        return f'{masked_local}@{parts[1]}'

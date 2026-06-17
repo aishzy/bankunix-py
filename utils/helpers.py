@@ -94,6 +94,7 @@ class ValidationUtils:
         
         return True, 'Valid amount'
     
+
 class IDGenerator:
     """Generate unique IDs for various users"""
 
@@ -178,3 +179,36 @@ class FormatUtils:
         else:
             masked_local = parts[0][:2] + '*' * (len(parts[0]) -2)
         return f'{masked_local}@{parts[1]}'
+
+
+class CalculationUtils:
+    """Calculation utilities"""
+
+    @staticmethod
+    def calculate_simple_interest(principal: float, rate: float, time: float) -> float:
+        """Calculate simple interest"""
+        return (principal * rate * time) / 100
+    
+    @staticmethod
+    def calculate_compund_interest(principal: float, rate: float, time: float, 
+                                   compound_per_year: int = 12) -> float:
+        """Calculate compound interest"""
+        amount = principal * ((1 + rate / (100 * compound_per_year)) ** (compound_per_year * time))
+        return amount - principal
+    
+    @staticmethod
+    def calculate_account_fee(balance: float, fee_type: str = 'monthly') -> float:
+        """Calculate account maintanence fees based on balance"""
+        if fee_type == 'monthly':
+            if balance < 500:
+                return 5.0
+            elif balance < 1000:
+                return 2.5
+            else:
+                return 0.0
+        return 0.0
+    
+    @staticmethod
+    def round_currency(amount: float) -> float:
+        """Round amount to 2 decimal places."""
+        return round(amount, 2)

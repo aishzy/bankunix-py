@@ -51,4 +51,87 @@ class AccountRepository:
         rows = cursor.fetchall()
         return [self._map_to_account(row) for row in rows]
     
+    def update_account(self, account: Account) -> bool:
+        """Update account information"""
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE accounts
+                SET balance = ?, is_active = ?, last_transaction_at = ?, interest_rate = ?
+                WHERE account_id = ?
+            ''', (account.balance, account.is_active, account.last_transaction_at, account.interest_rate, account.account_id))
+            conn.commit()
+            return True
+        except sqlite3.Error:
+            return False
+        
+    def update_balance(self, account_id: str, new_balance: float) -> bool:
+        """Update account balance""" 
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE accounts 
+                SET balance = ?, last_transaction_at = ?
+                WHERE account_id = ?
+            ''', (new_balance, datetime.now(), account_id))
+            conn.commit()
+            return True
+        except sqlite3.Error:
+            return False
     
+    def get_total_balance_by_user(self, user_id: str) -> float:
+        """Get total balane across all accounts for a user"""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT SUM(balance) as total
+            FROM accounts
+            WHERE user_id = ? AND is_active = 1
+        ''', (user_id,))
+        row = cursor.fetchone()
+        return row['total'] or 0.0
+    
+    def get_accounts_by_type(self, user_id: str, account_type: AccountType) -> List[Account]:
+        """Get accounts of a specific type for a user"""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM accounts
+            WHERE user_id = ? AND account_type = ? AND is_active = 1
+        ''', (user_id, account_type.value))
+        rows = cursor.fetchcall()
+        return [self._map_to_account(row) for row in rows]
+    
+    def close_account(self, account_id: str) -> bool:
+        """Close an account (soft delete)"""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            'UPDATE accounts SET is_active = 0 WHERE account_id = ?', (account_id,)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    
+    def check_account_exists(self, account_id: str) -> bool:
+        """Check if account exists and is active"""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1 FROM accounts WHERE account_id = ? AND is_active = 1', (account_id,))
+        return cursor.fetchone() is not None
+    
+    @staticmethod
+    def _map_to_account(row: sqlite3.Row) -> Account:
+        """Map database row to account object"""
+        return Account(
+            account_id = row['account_id'],
+            user_id = row['user_id'],
+            account_type = row['account_type'],
+            account_number = row['account_number'],
+            balance = row['balance'],
+            currency = row['currency'],
+            created_at = datetime.fromisoformat(row['created_at']),
+            is_active = bool(row['is_active']),
+            last_transaction_at = datetime.fromisoformat(row['last_transaction_at'] if row['last_transaction_at'] else None)
+        )

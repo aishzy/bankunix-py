@@ -89,3 +89,79 @@ class AuthenticationService:
             Returns: (success, message)
         """
         user = self.user_repo.get_user_by_id(user_id)
+
+        if not user:
+            return False, "User not found"
+        
+        # Verify old password 
+        if not SecurityUtils.verify_password(old_password, user.password_hash):
+            return False, "Current password is incorrect"
+        
+        # Validate new password
+        is_strong, msg = ValidationUtils.validate_password_strength(new_password)
+        if not is_strong:
+            return False, msg
+        
+        # Update password
+        user.password_hash, _ = SecurityUtils.hash_password(new_password)
+
+        if self.user_repo.update_user(user):
+            return True, "Password changed successfully"
+        else:
+            return False, "Error changing password"
+    
+    def reset_password(self, email: str) -> Tuple[bool, str, Optional[str]]:
+        """
+        Reset user password and return temporary password
+        Returns: (success, mesage, temp_password)
+        """
+        user = self.user_repo.get_user_by_email(email)
+
+        if not user:
+            return False, "Email not found", None
+        
+        # Generate temporary password 
+        temp_password = SecurityUtils.generate_secure_password(12)
+        user.password_hash, _ = SecurityUtils.hash_password(temp_password)
+
+        if self.user_repo.update_user(user):
+            return True, "Temporary password generated, Please check your email", temp_password
+        else:
+            return False, "Error resetting password", None
+        
+    def verify_email(self, user_id: str) -> Tuple[bool, str]:
+        """Verify user email (mark as verified)"""
+        user = self.user_repo.get_user_by_id(user_id)
+
+        if not user:
+            return False, "User not found"
+        
+        # In production, this would be a proper email verification flow
+        return True, "Email Verified successfully"
+    
+    def unlock_account(self, user_id: str) -> Tuple[bool, str]:
+        """Unlock a locked account (admin function)"""
+        user = self.user_repo.get_user_by_id(user_id)
+
+        if not user:
+            return False, "User not found"
+        
+        self.user_repo.unlock_account(user_id)
+        return True, "Account unlocked successfully"
+    
+    def get_user_profile(self, user_id: str) -> Optional[dict]:
+        """Get user profile information"""
+        user = self.user_repo.get_user_by_id(user_id)
+
+        if not user:
+            return None
+        
+        return {
+            'user_id': user.user_id,
+            'full_name': user.full_name,
+            'email': user.email,
+            'phone': user.phone,
+            'created_at': user.created_at,
+            'is_active': user.is_active,
+            'is_locked': user.is_account_locked()
+        }

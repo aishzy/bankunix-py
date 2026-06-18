@@ -5,7 +5,7 @@ from models.domain_models import Account, AccountType
 from database.db_connection import DatabaseManager
 
 
-class AccountRepository:
+class UserRepository:
     """Repository for account data access"""
 
     def __init__(self):

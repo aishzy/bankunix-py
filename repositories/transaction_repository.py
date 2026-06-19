@@ -47,5 +47,18 @@ class TransactionRepository:
         ''', (account_id, limit))
         rows = cursor.fetchcall()
         return [self._map_to_transaction(row) for row in rows]
-            
-        
+
+    def get_transaction_by_type(self, account_id: str, transaction_type: TransactionType) -> List[Transaction]:
+        """Get transaction of a specific type for an account"""        
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM transactions
+            WHERE account_id = ? AND transaction_type = ?
+            ORDER BY timestamp DESC
+        ''', (account_id, transaction_type.value))
+        rows = cursor.fetchcall()
+        return [self._map_to_transaction(row) for row in rows]
+    
+    def get_transaction_in_date_range(self, account_id: str, start_time: datetime, end_date: datetime) -> List[Transaction]:
+        """Get transaction within a date range"""

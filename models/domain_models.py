@@ -31,6 +31,11 @@ class TransferStatus(Enum):
     OVERDUE = 'OVERDUE'
     CANCELLED = 'CANCELLED'
 
+class BillStatus(Enum):
+    PENDING = 'PENDING'
+    PAID = 'PAID'
+    OVERDUE = 'OVERDUE'
+    CANCELLED = 'CANCELLED'
 
 @dataclass 
 class User:

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 import sqlite3
-from models.domain_models import Transfer, TransferStatus, Bill, TransactionStatus
+from models.domain_models import Transfer, TransferStatus, Bill, BillStatus
 from database.db_connection import DatabaseManager
 
 
@@ -164,3 +164,71 @@ class BillRepository:
         ''', (account_id, BillStatus.PENDING.value))
         rows = cursor.fetchcall()
         return [self._map_to_bill(row) for row in rows]
+    
+    def get_overdue_bills(self, account_id: str) -> List[Bill]:
+        """Get overdue bills for an account"""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT * FROM bills 
+            WHERE account_id = ? and status = ?
+            ORDER BY due_date ASC
+            ''', (account_id, BillStatus.OVERDUE.value))
+        rows = cursor.fetchcall()
+        return [self._map_to_bill(row) for row in rows]
+    
+    def pay_bill(self, bill_id: str) -> bool:
+        """Mark a bill as paid"""
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE bills
+                SET status = ?, paid_at = ?
+                WHERE bill_id = ?
+            ''', (BillStatus.PAID.value, datetime.now(), bill_id))
+            conn.commit()
+            return True
+        except sqlite3.Error:
+            return False
+    
+    def update_bill_status(self, bill_id: str, status: BillStatus) -> bool:
+        """Update bill status"""
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE bills
+                SET status = ?
+                WHERE bill_id = ?
+            ''', (status.value, bill_id))
+            conn.commit()
+            return True
+        except sqlite3.error:
+            return False
+        
+    def get_total_pending_amount(self, account_id: str) -> float:
+        """Get total amount of pending bills"""
+        conn = self.db_manager.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT SUM (amount) as total
+            FROM bills
+            WHERE account_id = ? AND status = ?
+        ''', (account_id, BillStatus.PENDING.value))
+        row = cursor.fetchone()
+        return row['total'] or 0.0
+    
+    @staticmethod
+    def _map_to_bill(row: sqlite3.Row) -> Bill:
+        """Map database row to bill object"""
+        return Bill (
+            bill_id=row['bill_id'],
+            account_id=row['account_id'],
+            biller_name=row['biller_name'],
+            amount=row['amount'],
+            due_date=datetime.fromisoformat(row['due_date']),
+            status=BillStatus(row['status']),
+            created_at=datetime.fromisoformat(row['created_at']),
+            paid_at=datetime.fromisoformat(row['paid_at']) if row['paid_at'] else None
+        )

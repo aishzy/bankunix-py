@@ -6,7 +6,7 @@ from repositories.transaction_repository import TransactionRepository
 from utils.helpers import IDGenerator, ValidationUtils, CalculationUtils
 
 
-class AccountServvice:
+class AccountService:
     """Service for account management"""
 
     def __init__(self):
@@ -55,7 +55,7 @@ class AccountServvice:
         """Get all accounts for a user"""
         return self.account_repo.get_account_by_user(user_id)
     
-    def depoosit(self, account_id: str, amount: float, description: str = 'Deposit') -> Tuple[bool, str]:
+    def deposit(self, account_id: str, amount: float, description: str = 'Deposit') -> Tuple[bool, str]:
         """
         Deposit money to account
         Returns: (success, message)

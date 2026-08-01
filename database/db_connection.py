@@ -62,7 +62,7 @@ class DatabaseManager:
                 account_type TEXT NOT NULL,
                 account_number TEXT UNIQUE NOT NULL,
                 balance REAL DEFAULT 0.0,
-                currency TEXT DEFAULT 'RM',
+                currency TEXT DEFAULT 'MYR',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
                 is_active BOOLEAN DEFAULT 1,
                 last_transaction_at TIMESTAMP,

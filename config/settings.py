@@ -1,67 +1,43 @@
-import os 
-from pathlib import Path
+"""
+Configuration Settings Module 
+=============================
+This module contains all configuration constants and settings for the banking system.
+These settings are used across all layers of the application.
+"""
 
-class Config:
-    """Base Configuration"""
+APP_CONFIG = {
+    'APP_NAME': 'BankUnix Banking System',
+    'APP_VERSION': 'v.1.0.0',
+    'DATABASE_PATH': 'bankunix_data.db',
+    'MIN_BALANCE': 0,
+    'MAX_TRANSACTION_AMOUNT': 100000,
+    'MIN_TRANSACTION_AMOUNT': 0.01,
+    'MONTHLY_INTEREST_RATE': 0.05,  # Interest rate per month for savings accounts (as decimal, e.g., 0.05 = 5%)
+    'OVERDRAFT_PENALTY': 50,        # Penalty fee for overdraft attempts (when balance would go negative)
+    'DAILY_TRANSACTION_LIMIT': 20,  # Daily transaction limit - Maximum number of transactions per day
+    'CURRENCY_SYMBOL': 'RM',
+    'DATE_FORMAT': '%Y-%m-%d %H:%M:%S', # Date format for displaying dates to users  
+}
 
-    # Application
-    APP_NAME = 'BankUnix'
-    APP_VERSION = 'v.1.0.0'
 
-    # Database
-    DATABASE_PATH = Path(__file__).parent.parent / 'data' / 'banking.db'
+# Transaction type constants used throughout the system
+TRANSACTION_TYPE = {
+    'DEPOSIT': 'DEPOSIT',
+    'WITHDRAWAL': 'WITHDRAWAL',
+    'TRANSFER': 'TRANSFER',
+    'INTEREST': 'INTEREST',
+    'PENALTY': 'PENALTY',
+}
 
-    # Security
-    MAX_FAILED_LOGIN_ATTEMPTS = 5
-    ACCOUNT_LOCK_DURATION_MINUTES = 30
-    PASSWORD_HASH_ALGORITHM = 'sha2256'
+# Account types constants 
+ACCOUNT_TYPES = {
+    'CHECKING': 'CHECKING', # Regular checking account with standard features
+    'SAVINGS': 'SAVINGS',   # Savings account that earn interest 
+}
 
-    # Validation 
-    MIN_PASSWORD_LENGTH = 6
-    MAX_ACCOUNT_NAME_LENGTH = 100
-    MAX_TRANSACTION_AMOUNT = 1000000
-    MIN_TRANSACTION_AMOUNT = 0.01
-
-    # Features
-    ENABLE_BILL_PAYMENT = True
-    ENABLE_INTEREST_CALCULATION = True
-    ENABLE_TRANSFER_LIMITS = True
-    DAILY_TRANSFER_LIMIT = 50000
-
-    # Logging 
-    LOG_DIR = Path(__file__).parent.parent / 'logs'
-    LOG_FILE = LOG_DIR / 'banking.db'
-    LOG_LEVEL = 'INFO'
-
-    # CLI 
-    SHOW_ACCOUNT_DETAILS = True
-    DEFAULT_STATEMENT_LIMIT = 10
-    CURRENCY_SYMBOL = 'RM'
-    CURRENCY_CODE = 'MYR'
-
-    @classmethod
-    def setup(cls):
-        """Setup configuration"""
-        cls.LOG_DIR.mkdir(parents=True, exist_ok=True)
-        cls.DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-class DevelopmentConfig(Config):
-    """Development Configuration"""
-    DEBUG = True
-    LOG_LEVEL = "DEBUG"
-
-class ProductionConfig(Config):
-    """Production Configuration"""
-    DEBUG = False
-    LOG_LEVEL = "WARNING"
-
-def get_config() -> Config:
-    """Get Configuration based on environment"""
-    env = os.getenv('BANK_ENV', 'development')
-
-    config_map = {
-        'development': DevelopmentConfig,
-        'production': ProductionConfig
-    }
-
-    return config_map.get(env, DevelopmentConfig)
+# Account status constants 
+ACCOUNT_STATUS = {
+    'ACTIVE': 'ACTIVE',
+    'FROZEN': 'FROZEN',
+    'CLOSED': 'CLOSED',
+}

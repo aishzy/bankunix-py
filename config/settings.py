@@ -21,7 +21,7 @@ APP_CONFIG = {
 
 
 # Transaction type constants used throughout the system
-TRANSACTION_TYPE = {
+TRANSACTION_TYPES = {
     'DEPOSIT': 'DEPOSIT',
     'WITHDRAWAL': 'WITHDRAWAL',
     'TRANSFER': 'TRANSFER',
